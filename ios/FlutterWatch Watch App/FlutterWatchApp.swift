@@ -6,12 +6,17 @@
 //
 
 import SwiftUI
+import WatchConnectivity
+import Combine
 
 @main
 struct FlutterWatch_Watch_AppApp: App {
+    @StateObject private var sessionManager = WCSessionManager()
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(sessionManager)
         }
     }
 }
