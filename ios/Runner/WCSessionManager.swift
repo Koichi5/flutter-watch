@@ -6,19 +6,20 @@
 //
 
 import WatchConnectivity
+import Flutter
 
 class WCSessionManager: NSObject {
-    private let methodChannel: FlutterMethodChannel
+    private let flutterApi: WatchCommunicationFlutterApi
     private var wcSession: WCSession?
 
-    init(methodChannel: FlutterMethodChannel) {
-        self.methodChannel = methodChannel
+    init(flutterApi: WatchCommunicationFlutterApi) {
+        self.flutterApi = flutterApi
         super.init()
     }
 
-    func initializeSession(completion: @escaping (Bool, String) -> Void) {
+    func initializeSession(completion: @escaping (SessionInitializeResult) -> Void) {
         guard WCSession.isSupported() else {
-            completion(false, "WCSession is not supported")
+            completion(SessionInitializeResult(success: false, statusKey: "not_supported"))
             return
         }
 
@@ -28,31 +29,31 @@ class WCSessionManager: NSObject {
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             guard let session = self?.wcSession else {
-                completion(false, "Session is nil after activation")
+                completion(SessionInitializeResult(success: false, statusKey: "error"))
                 return
             }
 
-            let status = self?.getSessionStatus(session) ?? "Error"
-            completion(session.isReachable, status)
+            let statusKey = self?.getSessionStatus(session) ?? "error"
+            completion(SessionInitializeResult(success: session.isReachable, statusKey: statusKey))
         }
     }
 
-    func sendCounterValue(_ counter: Int, completion: @escaping (Bool) -> Void) {
+    func sendCounterValue(_ counter: Int64, completion: @escaping (CounterResult) -> Void) {
         guard let session = wcSession else {
-            completion(false)
+            completion(CounterResult(success: false))
             return
         }
 
         guard session.isReachable else {
-            completion(false)
+            completion(CounterResult(success: false))
             return
         }
 
         let message = ["counter": counter]
         session.sendMessage(message, replyHandler: { response in
-            completion(true)
+            completion(CounterResult(success: true))
         }, errorHandler: { error in
-            completion(false)
+            completion(CounterResult(success: false))
         })
     }
 
@@ -90,40 +91,52 @@ extension WCSessionManager: WCSessionDelegate {
                 }
             }
 
-            self?.methodChannel.invokeMethod("sessionStateChanged",
-                                           arguments: ["status_key": status])
+            self?.flutterApi.onSessionStateChanged(
+                event: SessionStateEvent(statusKey: statusKey),
+                completion: { _ in }
+            )
         }
     }
 
     func sessionDidBecomeInactive(_ session: WCSession) {
+        print("📱 セッション一時非アクティブ - 自動復旧を待機")
+        print("📱 詳細: isPaired=\(session.isPaired), isWatchAppInstalled=\(session.isWatchAppInstalled), isReachable=\(session.isReachable)")
+
         DispatchQueue.main.async { [weak self] in
-            self?.methodChannel.invokeMethod("sessionStateChanged",
-                                           arguments: ["status_key": "not_reachable"])
+            self?.flutterApi.onSessionStateChanged(
+                event: SessionStateEvent(statusKey: "not_reachable"),
+                completion: { _ in }
+            )
         }
     }
 
     func sessionDidDeactivate(_ session: WCSession) {
         DispatchQueue.main.async { [weak self] in
-            self?.methodChannel.invokeMethod("sessionStateChanged",
-                                           arguments: ["status_key": "error"])
+            self?.flutterApi.onSessionStateChanged(
+                event: SessionStateEvent(statusKey: "error"),
+                completion: { _ in }
+            )
         }
     }
 
     func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
         DispatchQueue.main.async { [weak self] in
             if let counter = message["counter"] as? Int {
-                self?.methodChannel.invokeMethod("counterUpdated",
-                                               arguments: ["counter": counter])
+                self?.flutterApi.onCounterUpdated(
+                    event: CounterUpdateEvent(counter: Int64(counter)),
+                    completion: { _ in }
+                )
             }
         }
     }
 
     func session(_ session: WCSession, didReceiveMessage message: [String : Any], replyHandler: @escaping ([String : Any]) -> Void) {
-
         DispatchQueue.main.async { [weak self] in
             if let counter = message["counter"] as? Int {
-                self?.methodChannel.invokeMethod("counterUpdated",
-                                               arguments: ["counter": counter])
+                self?.flutterApi.onCounterUpdated(
+                    event: CounterUpdateEvent(counter: Int64(counter)),
+                    completion: { _ in }
+                )
             }
 
             let reply = ["status": "received"] as [String : Any]

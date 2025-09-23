@@ -12,43 +12,39 @@ import WatchConnectivity
   ) -> Bool {
 
     let controller : FlutterViewController = window?.rootViewController as! FlutterViewController
-    let counterChannel = FlutterMethodChannel(name: "flutter_watch/counter",
-                                              binaryMessenger: controller.binaryMessenger)
 
-    wcSessionManager = WCSessionManager(methodChannel: counterChannel)
+    // PigeonのFlutterAPIを初期化
+    let flutterApi = WatchCommunicationFlutterApi(binaryMessenger: controller.binaryMessenger)
 
-    counterChannel.setMethodCallHandler { [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) in
-      self?.handleMethodCall(call: call, result: result)
-    }
+    // WCSessionManagerを初期化
+    wcSessionManager = WCSessionManager(flutterApi: flutterApi)
+
+    // PigeonのHostAPIを設定
+    let hostApi = WatchCommunicationHostApiImpl(wcSessionManager: wcSessionManager!)
+    WatchCommunicationHostApiSetup.setUp(binaryMessenger: controller.binaryMessenger, api: hostApi)
 
     GeneratedPluginRegistrant.register(with: self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
+}
 
-  private func handleMethodCall(call: FlutterMethodCall, result: @escaping FlutterResult) {
-    switch call.method {
-    case "initializeSession":
-      wcSessionManager?.initializeSession { success, statusKey in
-        DispatchQueue.main.async {
-          result(["status_key": statusKey])
-        }
-      }
+// PigeonのHostAPIの実装
+class WatchCommunicationHostApiImpl: NSObject, WatchCommunicationHostApi {
+    private let wcSessionManager: WCSessionManager
 
-    case "sendCounter":
-      guard let args = call.arguments as? [String: Any],
-            let counter = args["counter"] as? Int else {
-        result(FlutterError(code: "INVALID_ARGUMENT", message: "Invalid counter value", details: nil))
-        return
-      }
-
-      wcSessionManager?.sendCounterValue(counter) { success in
-        DispatchQueue.main.async {
-          result(success)
-        }
-      }
-
-    default:
-      result(FlutterMethodNotImplemented)
+    init(wcSessionManager: WCSessionManager) {
+        self.wcSessionManager = wcSessionManager
     }
-  }
+
+    func initializeSession(completion: @escaping (Result<SessionInitializeResult, Error>) -> Void) {
+        wcSessionManager.initializeSession { result in
+            completion(.success(result))
+        }
+    }
+
+    func sendCounter(request: CounterRequest, completion: @escaping (Result<CounterResult, Error>) -> Void) {
+        wcSessionManager.sendCounterValue(request.counter) { result in
+            completion(.success(result))
+        }
+    }
 }

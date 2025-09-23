@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_watch/models/method_channel_method.dart';
 import 'package:flutter_watch/models/watch_connection_status.dart';
 import 'package:flutter_watch/models/watch_status_key.dart';
 import 'package:flutter_watch/providers/connection_status_provider.dart';
 import 'package:flutter_watch/providers/counter_provider.dart';
+import 'package:flutter_watch/pigeons/watch_communication_api.g.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -17,20 +17,19 @@ WatchCommunicationService watchCommunicationService(
   return WatchCommunicationService(ref);
 }
 
-const MethodChannel platformChannel = MethodChannel('flutter_watch/counter');
-
-class WatchCommunicationService {
+class WatchCommunicationService extends WatchCommunicationFlutterApi {
   final Ref _ref;
+  late final WatchCommunicationHostApi _hostApi;
 
   WatchCommunicationService(this._ref) {
-    _setupMessageListener();
+    _hostApi = WatchCommunicationHostApi();
+    WatchCommunicationFlutterApi.setUp(this);
   }
 
   Future<void> initializeConnection() async {
     try {
-      final result = await platformChannel.invokeMethod('initializeSession');
-      final statusKey = result['status_key'] ?? 'error';
-      final status = _parseConnectionStatus(statusKey);
+      final result = await _hostApi.initializeSession();
+      final status = _parseConnectionStatus(result.statusKey);
       _ref.read(connectionStatusProvider.notifier).update(status);
     } on PlatformException {
       _ref
@@ -39,40 +38,27 @@ class WatchCommunicationService {
     }
   }
 
-  void _setupMessageListener() {
-    platformChannel.setMethodCallHandler((call) async {
-      final method = MethodChannelMethod.fromString(call.method);
-
-      switch (method) {
-        case MethodChannelMethod.counterUpdated:
-          final int newValue = call.arguments['counter'];
-          _ref.read(counterProvider.notifier).set(newValue);
-          break;
-
-        case MethodChannelMethod.sessionStateChanged:
-          final String statusKey = call.arguments['status_key'] ?? '';
-          final status = _parseConnectionStatus(statusKey);
-          _ref.read(connectionStatusProvider.notifier).update(status);
-          break;
-
-        default:
-          debugPrint('📱 Unknown method received: ${call.method}');
-          break;
-      }
-    });
-  }
-
   Future<bool> updateCounter(int newValue) async {
     try {
-      final success = await platformChannel.invokeMethod('sendCounter', {
-        'counter': newValue,
-      });
-
-      return success == true;
+      final result = await _hostApi.sendCounter(
+        CounterRequest(counter: newValue),
+      );
+      return result.success;
     } on PlatformException catch (e) {
       debugPrint('📱 Send error: ${e.message}');
       rethrow;
     }
+  }
+
+  @override
+  void onCounterUpdated(CounterUpdateEvent event) {
+    _ref.read(counterProvider.notifier).set(event.counter);
+  }
+
+  @override
+  void onSessionStateChanged(SessionStateEvent event) {
+    final status = _parseConnectionStatus(event.statusKey);
+    _ref.read(connectionStatusProvider.notifier).update(status);
   }
 
   WatchConnectionStatus _parseConnectionStatus(String statusKey) {
