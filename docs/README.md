@@ -56,11 +56,12 @@ flutter_watch/
 │       ├── ContentView.swift    # Watch UI
 │       └── WatchSessionManager.swift # Watch側通信管理
 └── docs/                        # 本ドキュメント
-    ├── overview/                # 概要説明
-    ├── flutter/                 # Flutter実装詳細
-    ├── ios/                     # iOS実装詳細
-    ├── watchos/                 # watchOS実装詳細
-    └── communication/          # 通信フロー詳細
+    └── guide/                   # 実装ガイド
+        ├── overview/            # 概要説明
+        ├── flutter/             # Flutter実装詳細
+        ├── ios/                 # iOS実装詳細
+        ├── watchos/             # watchOS実装詳細
+        └── communication/       # 通信フロー詳細
 ```
 
 ## 🚀 主要機能
@@ -117,11 +118,11 @@ sequenceDiagram
 
 詳細な実装説明は以下のドキュメントを参照してください：
 
-- [📋 実装概要](./overview/) - アーキテクチャと設計思想
-- [🎯 Flutter 実装](./flutter/) - Flutter 側の詳細実装
-- [📱 iOS 実装](./ios/) - iOS 側のネイティブ実装
-- [⌚ watchOS 実装](./watchos/) - Apple Watch 側の実装
-- [🔄 通信フロー](./communication/) - データ通信の詳細解説
+- [📋 実装概要](./guide/overview/) - アーキテクチャと設計思想
+- [🎯 Flutter 実装](./guide/flutter/) - Flutter 側の詳細実装
+- [📱 iOS 実装](./guide/ios/) - iOS 側のネイティブ実装
+- [⌚ watchOS 実装](./guide/watchos/) - Apple Watch 側の実装
+- [🔄 通信フロー](./guide/communication/) - データ通信の詳細解説
 
 ## 🎯 学習ポイント
 
