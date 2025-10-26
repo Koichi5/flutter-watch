@@ -6,13 +6,6 @@ import 'package:pigeon/pigeon.dart';
     swiftOut: 'ios/Runner/WatchCommunicationApi.g.swift',
   ),
 )
-// セッション初期化の結果
-class SessionInitializeResult {
-  final bool success;
-  final String statusKey;
-
-  SessionInitializeResult({required this.success, required this.statusKey});
-}
 
 // カウンター送信のリクエスト
 class CounterRequest {
@@ -28,18 +21,26 @@ class CounterResult {
   CounterResult({required this.success});
 }
 
-// セッション状態変更のイベント
-class SessionStateEvent {
-  final String statusKey;
-
-  SessionStateEvent({required this.statusKey});
-}
-
 // カウンター更新のイベント
 class CounterUpdateEvent {
   final int counter;
 
   CounterUpdateEvent({required this.counter});
+}
+
+// セッション初期化の結果
+class SessionInitializeResult {
+  final bool success;
+  final String statusKey;
+
+  SessionInitializeResult({required this.success, required this.statusKey});
+}
+
+// セッション状態変更のイベント
+class SessionStateEvent {
+  final String statusKey;
+
+  SessionStateEvent({required this.statusKey});
 }
 
 // Flutter → iOS の呼び出し (HostApi)

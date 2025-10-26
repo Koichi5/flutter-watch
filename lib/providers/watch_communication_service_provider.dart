@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_watch/models/watch_connection_status.dart';
 import 'package:flutter_watch/models/watch_status_key.dart';
@@ -12,16 +11,16 @@ part 'watch_communication_service_provider.g.dart';
 
 @riverpod
 WatchCommunicationService watchCommunicationService(
-  WatchCommunicationServiceRef ref,
+  Ref ref,
 ) {
   return WatchCommunicationService(ref);
 }
 
 class WatchCommunicationService extends WatchCommunicationFlutterApi {
-  final Ref _ref;
+  final Ref ref;
   late final WatchCommunicationHostApi _hostApi;
 
-  WatchCommunicationService(this._ref) {
+  WatchCommunicationService(this.ref) {
     _hostApi = WatchCommunicationHostApi();
     WatchCommunicationFlutterApi.setUp(this);
   }
@@ -30,9 +29,9 @@ class WatchCommunicationService extends WatchCommunicationFlutterApi {
     try {
       final result = await _hostApi.initializeSession();
       final status = _parseConnectionStatus(result.statusKey);
-      _ref.read(connectionStatusProvider.notifier).update(status);
+      ref.read(connectionStatusProvider.notifier).update(status);
     } on PlatformException {
-      _ref
+      ref
           .read(connectionStatusProvider.notifier)
           .update(WatchConnectionStatus.error);
     }
@@ -44,21 +43,20 @@ class WatchCommunicationService extends WatchCommunicationFlutterApi {
         CounterRequest(counter: newValue),
       );
       return result.success;
-    } on PlatformException catch (e) {
-      debugPrint('📱 Send error: ${e.message}');
+    } on PlatformException {
       rethrow;
     }
   }
 
   @override
   void onCounterUpdated(CounterUpdateEvent event) {
-    _ref.read(counterProvider.notifier).set(event.counter);
+    ref.read(counterProvider.notifier).set(event.counter);
   }
 
   @override
   void onSessionStateChanged(SessionStateEvent event) {
     final status = _parseConnectionStatus(event.statusKey);
-    _ref.read(connectionStatusProvider.notifier).update(status);
+    ref.read(connectionStatusProvider.notifier).update(status);
   }
 
   WatchConnectionStatus _parseConnectionStatus(String statusKey) {

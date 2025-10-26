@@ -166,15 +166,15 @@ class _PigeonCodec extends StandardMessageCodec {
   @override
   Object? readValueOfType(int type, ReadBuffer buffer) {
     switch (type) {
-      case 129: 
+      case 129:
         return SessionInitializeResult.decode(readValue(buffer)!);
-      case 130: 
+      case 130:
         return CounterRequest.decode(readValue(buffer)!);
-      case 131: 
+      case 131:
         return CounterResult.decode(readValue(buffer)!);
-      case 132: 
+      case 132:
         return SessionStateEvent.decode(readValue(buffer)!);
-      case 133: 
+      case 133:
         return CounterUpdateEvent.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
