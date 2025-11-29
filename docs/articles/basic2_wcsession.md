@@ -1,3 +1,11 @@
+## 初めに
+この章では、WCSession を使って iOS と watchOS 間でデータのやり取りを行う方法を学びます。
+
+### この章でできるようになること
+- WCSession を使って iOS と watchOS 間で通信する方法を理解する
+- sendMessage メソッドを使った実装方法を学ぶ
+- Flutter と iOS、watchOS を連携させる方法を理解する
+
 ## WCSessionとは
 [WCSession](https://developer.apple.com/documentation/watchconnectivity/wcsession)とは、Apple WatchアプリとiOSアプリ間の通信を行うためのオブジェクトです。
 iOSアプリとwatchOSアプリは、実行中にこのクラスのインスタンスを作成し、設定する必要があります。両方のセッションがアクティブな場合にメッセージを送受信することで即座に通信できます。
@@ -10,8 +18,7 @@ WCSessionを利用した通信には、いくつかの前提条件がありま�
 - 通信を行う iPhone と Apple Watch がペアリングされていること
 - 両方のデバイスに同じアプリケーションがインストールされていること
 
-さらに、[WWDC のセッション](https://developer.apple.com/jp/videos/play/wwdc2021/10003/?t=817) によると、
-WCSession は Bluetooth または Wi-Fi を用いて通信します。そのため、両デバイスは以下のいずれかの条件を満たす必要があります。
+さらに、[WWDC のセッション](https://developer.apple.com/jp/videos/play/wwdc2021/10003/?t=817) によると、WCSession は Bluetooth または Wi-Fi を用いて通信します。そのため、両デバイスは以下のいずれかの条件を満たす必要があります。
 - Bluetooth の通信が可能な範囲にある
 - 同じ Wi-Fi ネットワークに接続されている
 
@@ -25,7 +32,7 @@ WCSession は Bluetooth または Wi-Fi を用いて通信します。そのた�
 
 ## 通信の方法
 WCSessionに用意されている通信方法の種類について軽く触れておきます。
-WCSessionには送信するデータや即時反映の必要性等に応じて使い分けができる
+WCSessionには送信するデータや即時反映の必要性等に応じて使い分けができます。
 以下のようなメソッドが用意されています。
 この章ではまず `sendMessage` を使って通信を行います。
 他のメソッドに関しては別の章で詳しく紹介します。
@@ -48,7 +55,6 @@ WCSessionには送信するデータや即時反映の必要性等に応じて�
 今回の実装では、簡単なカウンターアプリを題材として扱います。
 
 最終的には以下の動画のように、iPhoneとApple Watchでそれぞれの操作を受け取り、表示内容が同期するような実装を行います。
-
 
 実装は以下の手順で進めていきます。
 1. iOSとwatchOS間のデータのやり取り
@@ -1301,59 +1307,15 @@ Future<void> incrementCounter() async {
 
 これで、watchOS、iOS、Flutterを繋ぐカウンターの実装が完了しました。
 
+## まとめ
+この章では、WCSession の `sendMessage` メソッドを使って iOS と watchOS 間でデータのやり取りを行う方法を学びました。
 
+主なポイント
+- WCSession は iOS と watchOS 間の通信を管理する
+- `sendMessage` は即座の応答が必要な操作に適している
+- 接続状態を確認してからメッセージを送信する
 
-
-
-実行時エラー
-```
-Cycle inside Runner; building could produce unreliable results.
-Cycle details:
-→ Target 'Runner' has copy command from '/Users/koichi/Library/Developer/Xcode/DerivedData/Runner-enicfgpvlghyfzfljgchjfsalgvx/Build/Products/Debug-watchsimulator/FlutterWatch Watch App.app' to '/Users/koichi/Library/Developer/Xcode/DerivedData/Runner-enicfgpvlghyfzfljgchjfsalgvx/Build/Products/Debug-iphonesimulator/Runner.app/Watch/FlutterWatch Watch App.app'
-○ That command depends on command in Target 'Runner': script phase “Thin Binary”
-○ Target 'Runner' has process command with output '/Users/koichi/Library/Developer/Xcode/DerivedData/Runner-enicfgpvlghyfzfljgchjfsalgvx/Build/Products/Debug-iphonesimulator/Runner.app/Info.plist'
-○ Target 'Runner' has copy command from '/Users/koichi/Library/Developer/Xcode/DerivedData/Runner-enicfgpvlghyfzfljgchjfsalgvx/Build/Products/Debug-watchsimulator/FlutterWatch Watch App.app' to '/Users/koichi/Library/Developer/Xcode/DerivedData/Runner-enicfgpvlghyfzfljgchjfsalgvx/Build/Products/Debug-iphonesimulator/Runner.app/Watch/FlutterWatch Watch App.app'
-
-
-Raw dependency cycle trace:
-
-target:  ->
-
-node: <all> ->
-
-command: <all> ->
-
-node: /Users/koichi/Library/Developer/Xcode/DerivedData/Runner-enicfgpvlghyfzfljgchjfsalgvx/Build/Intermediates.noindex/Runner.build/Debug-iphonesimulator/Runner.build/Objects-normal/arm64/ExtractedAppShortcutsMetadata.stringsdata ->
-
-command: P0:target-Runner-18c1723432283e0cc55f10a6dcfd9e0288a783a885d8b0b3beb2e9f90bde3f49-:Debug:ExtractAppIntentsMetadata ->
-
-node: <target-Runner-18c1723432283e0cc55f10a6dcfd9e0288a783a885d8b0b3beb2e9f90bde3f49--fused-phase4-copy-files> ->
-
-command: P0:::Gate target-Runner-18c1723432283e0cc55f10a6dcfd9e0288a783a885d8b0b3beb2e9f90bde3f49--fused-phase4-copy-files ->
-
-node: <Copy /Users/koichi/Library/Developer/Xcode/DerivedData/Runner-enicfgpvlghyfzfljgchjfsalgvx/Build/Products/Debug-iphonesimulator/Runner.app/Watch/FlutterWatch Watch App.app> ->
-
-CYCLE POINT ->
-
-command: P0:target-Runner-18c1723432283e0cc55f10a6dcfd9e0288a783a885d8b0b3beb2e9f90bde3f49-:Debug:Copy /Users/koichi/Library/Developer/Xcode/DerivedData/Runner-enicfgpvlghyfzfljgchjfsalgvx/Build/Products/Debug-iphonesimulator/Runner.app/Watch/FlutterWatch Watch App.app /Users/koichi/Library/Developer/Xcode/DerivedData/Runner-enicfgpvlghyfzfljgchjfsalgvx/Build/Products/Debug-watchsimulator/FlutterWatch Watch App.app ->
-
-node: <target-Runner-18c1723432283e0cc55f10a6dcfd9e0288a783a885d8b0b3beb2e9f90bde3f49--fused-phase3-thin-binary> ->
-
-command: P0:::Gate target-Runner-18c1723432283e0cc55f10a6dcfd9e0288a783a885d8b0b3beb2e9f90bde3f49--fused-phase3-thin-binary ->
-
-node: <execute-shell-script-18c1723432283e0cc55f10a6dcfd9e02f1eee2015e8ff5ebcd27678f788c2826-target-Runner-18c1723432283e0cc55f10a6dcfd9e0288a783a885d8b0b3beb2e9f90bde3f49-> ->
-
-command: P2:target-Runner-18c1723432283e0cc55f10a6dcfd9e0288a783a885d8b0b3beb2e9f90bde3f49-:Debug:PhaseScriptExecution Thin Binary /Users/koichi/Library/Developer/Xcode/DerivedData/Runner-enicfgpvlghyfzfljgchjfsalgvx/Build/Intermediates.noindex/Runner.build/Debug-iphonesimulator/Runner.build/Script-3B06AD1E1E4923F5004D2608.sh ->
-
-node: /Users/koichi/Library/Developer/Xcode/DerivedData/Runner-enicfgpvlghyfzfljgchjfsalgvx/Build/Products/Debug-iphonesimulator/Runner.app/Info.plist ->
-
-command: P0:target-Runner-18c1723432283e0cc55f10a6dcfd9e0288a783a885d8b0b3beb2e9f90bde3f49-:Debug:ProcessInfoPlistFile /Users/koichi/Library/Developer/Xcode/DerivedData/Runner-enicfgpvlghyfzfljgchjfsalgvx/Build/Products/Debug-iphonesimulator/Runner.app/Info.plist /Users/koichi/StudioProjects/flutter_watch/ios/Runner/Info.plist ->
-
-node: /Users/koichi/Library/Developer/Xcode/DerivedData/Runner-enicfgpvlghyfzfljgchjfsalgvx/Build/Products/Debug-iphonesimulator/Runner.app/Watch/FlutterWatch Watch App.app ->
-
-command: P0:target-Runner-18c1723432283e0cc55f10a6dcfd9e0288a783a885d8b0b3beb2e9f90bde3f49-:Debug:Copy /Users/koichi/Library/Developer/Xcode/DerivedData/Runner-enicfgpvlghyfzfljgchjfsalgvx/Build/Products/Debug-iphonesimulator/Runner.app/Watch/FlutterWatch Watch App.app /Users/koichi/Library/Developer/Xcode/DerivedData/Runner-enicfgpvlghyfzfljgchjfsalgvx/Build/Products/Debug-watchsimulator/FlutterWatch Watch App.app
-```
-
+実践編では他の WCSession メソッドについても触れているので、そちらで `sendMessage`以外のメソッドについても扱っていきます。
 
 ## 参考
 

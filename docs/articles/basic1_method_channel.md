@@ -2,6 +2,11 @@
 この基礎編では、Method ChannelとWCSessionを使って、FlutterとApple Watch間でデータのやり取りをするアプリを作成していきます。
 この基礎編の目的は、実際に動くアプリケーションを作成するのと同時に、Method ChannelやWCSessionがどのようにして動いているのかを理解していくことです。
 
+### この章でできるようになること
+- Method Channel を使って Flutter と iOS 間で通信する方法を理解する
+- 実際に動作するカウンターアプリを実装する
+- Platform Channel の仕組みを理解する
+
 ## Method Channelとは
 Flutterアプリでは、Method Channelを使用することで、iOSやAndroidなどのプラットフォーム固有のコードを使用できます。
 Flutter側の[Method Channel](https://api.flutter.dev/flutter/services/MethodChannel-class.html?_gl=1*1n90s58*_ga*MTcwNDUxMzQwMS4xNzU2OTkyOTk1*_ga_04YGWK0175*czE3NTY5OTI5OTQkbzEkZzEkdDE3NTY5OTMyNzgkajYwJGwwJGgw)では、プラットフォーム側にメソッド呼び出しに対応するメッセージを送信することができます。
